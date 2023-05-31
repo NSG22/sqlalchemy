@@ -509,7 +509,7 @@ class ResultInternal(InPlaceGenerative, Generic[_R]):
     @HasMemoized_ro_memoized_attribute
     def _iterator_getter(self) -> Callable[..., Iterator[_R]]:
 
-        make_row = self._row_getter
+        make_row = None#self._row_getter
 
         post_creational_filter = self._post_creational_filter
 
