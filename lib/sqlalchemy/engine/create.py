@@ -81,6 +81,7 @@ def create_engine(
     plugins: List[str] = ...,
     query_cache_size: int = ...,
     use_insertmanyvalues: bool = ...,
+    extensions: List[str] = ...,
     **kwargs: Any,
 ) -> Engine:
     ...
@@ -532,6 +533,9 @@ def create_engine(url: Union[str, _url.URL], **kwargs: Any) -> Engine:
 
         :ref:`engine_insertmanyvalues`
 
+    :param extensions=None: list of extensions to load.
+    Make sure the extensions are in your path.
+
     """  # noqa
 
     if "strategy" in kwargs:
@@ -675,6 +679,9 @@ def create_engine(url: Union[str, _url.URL], **kwargs: Any) -> Engine:
     # engines with mocks etc.
     _initialize = kwargs.pop("_initialize", True)
 
+    # get the list of extensions to load
+    extensions = kwargs.pop("extensions", None)
+
     # all kwargs should be consumed
     if kwargs:
         raise TypeError(
@@ -703,6 +710,12 @@ def create_engine(url: Union[str, _url.URL], **kwargs: Any) -> Engine:
             ) -> None:
                 assert do_on_connect is not None
                 do_on_connect(dbapi_connection)
+
+                if extensions is not None:
+                    dbapi_connection.enable_load_extension(True)
+                    for extension_name in extensions:
+                        dbapi_connection.execute(f"SELECT load_extension('{extension_name}');")
+                    dbapi_connection.enable_load_extension(False)
 
             event.listen(pool, "connect", on_connect)
 
