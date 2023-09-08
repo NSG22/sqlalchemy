@@ -2321,12 +2321,15 @@ class SQLiteDialect(default.DefaultDialect):
 
         if coltype in self.ischema_names:
             coltype = self.ischema_names[coltype]
-        elif "INT" in coltype:
+        elif "INT" in coltype and not "POINT" in coltype:
             coltype = sqltypes.INTEGER
         elif "CHAR" in coltype or "CLOB" in coltype or "TEXT" in coltype:
             coltype = sqltypes.TEXT
-        elif "BLOB" in coltype or not coltype:
-            coltype = sqltypes.NullType
+        elif "BLOB" in coltype      \
+            or "POINT" in coltype   \
+            or "POLYGON" in coltype \
+            or "LINESTRING" in coltype:
+            coltype = sqltypes.BLOB
         elif "REAL" in coltype or "FLOA" in coltype or "DOUB" in coltype:
             coltype = sqltypes.REAL
         else:
